@@ -1,0 +1,28 @@
+services:
+  vpn-openvpn:
+    build: .
+    image: local/openvpn-forwarder:1.1
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      OVPN_CONFIG_FILE: /config/client.ovpn
+      OVPN_KEY_PASSWORD_FILE: /run/secrets/key_password
+      PORT_FORWARDS: 3389:10.20.30.40:3389
+      HEALTH_MODE: all
+    volumes:
+      - ./secrets/client.ovpn:/config/client.ovpn:ro
+    secrets:
+      - key_password
+    networks:
+      - guac-vpn-transit
+
+secrets:
+  key_password:
+    file: ./secrets/key_password
+
+networks:
+  guac-vpn-transit:
+    external: true

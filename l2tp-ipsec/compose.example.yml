@@ -1,0 +1,37 @@
+services:
+  vpn-l2tp:
+    build: .
+    image: local/l2tp-ipsec-forwarder:1.2
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/ppp:/dev/ppp
+    environment:
+      VPN_SERVER: vpn.example.com
+      VPN_USERNAME_FILE: /run/secrets/vpn_username
+      VPN_PASSWORD_FILE: /run/secrets/vpn_password
+      VPN_PSK_FILE: /run/secrets/vpn_psk
+      VPN_DNS_SERVERS: 10.20.30.53
+      VPN_DNS_SUFFIX: corp.example
+      PORT_FORWARDS: 3389:rdp01.corp.example:3389
+      HEALTH_MODE: all
+    secrets:
+      - vpn_username
+      - vpn_password
+      - vpn_psk
+    networks:
+      - guac-vpn-transit
+
+secrets:
+  vpn_username:
+    file: ./secrets/vpn_username
+  vpn_password:
+    file: ./secrets/vpn_password
+  vpn_psk:
+    file: ./secrets/vpn_psk
+
+networks:
+  guac-vpn-transit:
+    external: true

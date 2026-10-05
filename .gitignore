@@ -1,0 +1,34 @@
+# Secrets and live VPN profiles
+.env
+.env.*
+secrets/
+**/secrets/
+*.secret
+*.password
+*.psk
+*.key
+*.pem
+*.p12
+*.pfx
+*.ovpn
+wg*.conf
+
+# Certificates from real environments
+*.cer
+*.crt
+
+# Diagnostics / captures
+*.pcap
+*.pcapng
+*.cap
+*.log
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local build artifacts
+*.tar
+*.tar.gz
+*.zip

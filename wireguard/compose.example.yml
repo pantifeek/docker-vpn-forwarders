@@ -1,0 +1,22 @@
+services:
+  vpn-wireguard:
+    build: .
+    image: local/wireguard-forwarder:1.1
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    environment:
+      WG_CONFIG_FILE: /config/wg0.conf
+      WG_INTERFACE: wg0
+      VPN_DNS_SERVERS: 10.20.30.53
+      VPN_DNS_SUFFIX: corp.example
+      PORT_FORWARDS: 3389:10.20.30.40:3389
+      HEALTH_MODE: all
+    volumes:
+      - ./secrets/wg0.conf:/config/wg0.conf:ro
+    networks:
+      - guac-vpn-transit
+
+networks:
+  guac-vpn-transit:
+    external: true

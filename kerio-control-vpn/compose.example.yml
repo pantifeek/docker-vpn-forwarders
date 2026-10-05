@@ -1,0 +1,39 @@
+services:
+  vpn-kerio:
+    build:
+      context: .
+      args:
+        KERIO_DEB_URL: https://cdn.kerio.com/dwn/control/control-9.5.0-9017/kerio-control-vpnclient-9.5.0-9017-p3-linux-amd64.deb
+    image: local/kerio-vpn-forwarder:1.1
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      VPN_SERVER: vpn.example.com
+      VPN_PORT: "4090"
+      VPN_USERNAME_FILE: /run/secrets/vpn_username
+      VPN_PASSWORD_FILE: /run/secrets/vpn_password
+      VPN_DNS_SERVERS: 10.20.30.53
+      VPN_DNS_SUFFIX: corp.example
+      PORT_FORWARDS: 3389:10.20.30.40:3389
+      # Prefer an explicitly verified fingerprint when automatic detection
+      # is not reliable in your environment.
+      # VPN_FINGERPRINT: 00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF
+    secrets:
+      - vpn_username
+      - vpn_password
+    networks:
+      - guac-vpn-transit
+
+secrets:
+  vpn_username:
+    file: ./secrets/vpn_username
+  vpn_password:
+    file: ./secrets/vpn_password
+
+networks:
+  guac-vpn-transit:
+    external: true

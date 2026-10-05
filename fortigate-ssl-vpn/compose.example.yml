@@ -1,0 +1,35 @@
+services:
+  vpn-fortigate:
+    build: .
+    image: local/fortivpn-forwarder:1.1
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/ppp:/dev/ppp
+    environment:
+      FORTI_HOST: vpn.example.com
+      FORTI_PORT: "443"
+      FORTI_USERNAME_FILE: /run/secrets/vpn_username
+      FORTI_PASSWORD_FILE: /run/secrets/vpn_password
+      VPN_DNS_SERVERS: 10.20.30.53
+      VPN_DNS_SUFFIX: corp.example
+      PORT_FORWARDS: 3389:10.20.30.40:3389
+      HEALTH_MODE: all
+      # Optional:
+      # FORTI_REALM: example-realm
+    secrets:
+      - vpn_username
+      - vpn_password
+    networks:
+      - guac-vpn-transit
+
+secrets:
+  vpn_username:
+    file: ./secrets/vpn_username
+  vpn_password:
+    file: ./secrets/vpn_password
+
+networks:
+  guac-vpn-transit:
+    external: true

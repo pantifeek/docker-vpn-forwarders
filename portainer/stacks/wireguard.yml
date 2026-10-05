@@ -1,0 +1,25 @@
+services:
+  vpn:
+    container_name: ${VPN_CONTAINER_NAME}
+    build:
+      context: ../../wireguard
+    image: ${VPN_IMAGE:-local/wireguard-forwarder:1.1}
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    environment:
+      WG_CONFIG_FILE: /config/wg0.conf
+      WG_INTERFACE: ${WG_INTERFACE:-wg0}
+      VPN_DNS_SERVERS: ${VPN_DNS_SERVERS:-}
+      VPN_DNS_SUFFIX: ${VPN_DNS_SUFFIX:-}
+      PORT_FORWARDS: ${PORT_FORWARDS}
+      HEALTH_TARGETS: ${HEALTH_TARGETS:-}
+      HEALTH_MODE: ${HEALTH_MODE:-all}
+    volumes:
+      - ${SECRET_DIR}/wg0.conf:/config/wg0.conf:ro
+    networks:
+      - transit
+networks:
+  transit:
+    name: ${TRANSIT_NETWORK:-guac-vpn-transit}
+    external: true

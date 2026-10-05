@@ -1,0 +1,36 @@
+services:
+  vpn-ikev2:
+    build: .
+    image: local/ikev2-forwarder:1.2
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      VPN_SERVER: vpn.example.com
+      VPN_SERVER_ID: vpn.example.com
+      VPN_USERNAME_FILE: /run/secrets/vpn_username
+      VPN_PASSWORD_FILE: /run/secrets/vpn_password
+      VPN_REMOTE_TS: 10.20.30.0/24
+      VPN_DNS_SERVERS: 10.20.30.53
+      VPN_DNS_SUFFIX: corp.example
+      PORT_FORWARDS: 3389:rdp01.corp.example:3389
+      HEALTH_MODE: all
+    secrets:
+      - vpn_username
+      - vpn_password
+    # Optional: mount a private CA required by the VPN gateway.
+    # volumes:
+    #   - ./secrets/ca:/config/ca:ro
+    networks:
+      - guac-vpn-transit
+
+secrets:
+  vpn_username:
+    file: ./secrets/vpn_username
+  vpn_password:
+    file: ./secrets/vpn_password
+
+networks:
+  guac-vpn-transit:
+    external: true

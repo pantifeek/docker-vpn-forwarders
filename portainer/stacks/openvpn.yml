@@ -1,0 +1,26 @@
+services:
+  vpn:
+    container_name: ${VPN_CONTAINER_NAME}
+    build:
+      context: ../../openvpn
+    image: ${VPN_IMAGE:-local/openvpn-forwarder:1.1}
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      OVPN_CONFIG_FILE: /config/client.ovpn
+      OVPN_KEY_PASSWORD_FILE: /run/secrets/key_password
+      PORT_FORWARDS: ${PORT_FORWARDS}
+      HEALTH_TARGETS: ${HEALTH_TARGETS:-}
+      HEALTH_MODE: ${HEALTH_MODE:-all}
+    volumes:
+      - ${SECRET_DIR}/client.ovpn:/config/client.ovpn:ro
+      - ${SECRET_DIR}/key_password:/run/secrets/key_password:ro
+    networks:
+      - transit
+networks:
+  transit:
+    name: ${TRANSIT_NETWORK:-guac-vpn-transit}
+    external: true
